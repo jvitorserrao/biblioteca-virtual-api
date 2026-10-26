@@ -42,7 +42,7 @@ public class EditoraServiceImpl implements EditoraService {
             throw new RegraNegocioException("Já existe uma editora cadastrada com o CNPJ " + dto.cnpj());
         }
 
-        Editora editora = preencherDto(new Editora(), dto);
+        Editora editora = preencherDto(Editora.builder(), dto);
         return EditoraResponseDTO.from(editoraRepository.save(editora));
     }
 
@@ -55,7 +55,7 @@ public class EditoraServiceImpl implements EditoraService {
             throw new RegraNegocioException("Já existe outra editora cadastrada com o CNPJ " + dto.cnpj());
         }
 
-        return EditoraResponseDTO.from(editoraRepository.save(preencherDto(editora, dto)));
+        return EditoraResponseDTO.from(editoraRepository.save(preencherDto(editora.toBuilder(), dto)));
     }
 
     @Override
@@ -75,11 +75,12 @@ public class EditoraServiceImpl implements EditoraService {
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Editora não encontrada com id " + id));
     }
 
-    private Editora preencherDto(Editora editora, EditoraRequestDTO dto) {
-        editora.setNome(dto.nome());
-        editora.setCnpj(dto.cnpj());
-        editora.setCidade(dto.cidade());
-        editora.setSite(dto.site());
-        return editora;
+    private Editora preencherDto(Editora.EditoraBuilder builder, EditoraRequestDTO dto) {
+        return builder
+                .nome(dto.nome())
+                .cnpj(dto.cnpj())
+                .cidade(dto.cidade())
+                .site(dto.site())
+                .build();
     }
 }

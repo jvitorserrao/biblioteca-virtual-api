@@ -1,7 +1,9 @@
 package br.com.bibliotecavirtual.api.dto.response;
 
 import br.com.bibliotecavirtual.model.entity.Editora;
+import lombok.Builder;
 
+@Builder
 public record EditoraResponseDTO(
         Long id,
         String nome,
@@ -10,12 +12,12 @@ public record EditoraResponseDTO(
         String site
 ) {
     public static EditoraResponseDTO from(Editora editora) {
-        return new EditoraResponseDTO(
-                editora.getId(),
-                editora.getNome(),
-                editora.getCnpj(),
-                editora.getCidade(),
-                editora.getSite()
-        );
+        return EditoraResponseDTO.builder()
+                .id(editora.getId())
+                .nome(editora.getNome())
+                .cnpj(editora.getCnpj())
+                .cidade(editora.getCidade())
+                .site(editora.getSite())
+                .build();
     }
 }

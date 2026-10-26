@@ -44,7 +44,7 @@ public class CategoriaServiceImpl implements CategoriaService {
             throw new RegraNegocioException("Já existe uma categoria com o nome " + dto.nome());
         }
 
-        Categoria categoria = preencherDto(new Categoria(), dto);
+        Categoria categoria = preencherDto(Categoria.builder(), dto);
         return CategoriaResponseDTO.from(categoriaRepository.save(categoria));
     }
 
@@ -57,7 +57,7 @@ public class CategoriaServiceImpl implements CategoriaService {
             throw new RegraNegocioException("Já existe outra categoria com o nome " + dto.nome());
         }
 
-        return CategoriaResponseDTO.from(categoriaRepository.save(preencherDto(categoria, dto)));
+        return CategoriaResponseDTO.from(categoriaRepository.save(preencherDto(categoria.toBuilder(), dto)));
     }
 
     @Override
@@ -81,11 +81,12 @@ public class CategoriaServiceImpl implements CategoriaService {
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Categoria não encontrada com id " + id));
     }
 
-    private Categoria preencherDto(Categoria categoria, CategoriaRequestDTO dto) {
-        categoria.setNome(dto.nome());
-        categoria.setDescricao(dto.descricao());
-        categoria.setAreaConhecimento(dto.areaConhecimento());
-        categoria.setAtiva(dto.ativa() == null || dto.ativa());
-        return categoria;
+    private Categoria preencherDto(Categoria.CategoriaBuilder builder, CategoriaRequestDTO dto) {
+        return builder
+                .nome(dto.nome())
+                .descricao(dto.descricao())
+                .areaConhecimento(dto.areaConhecimento())
+                .ativa(dto.ativa() == null || dto.ativa())
+                .build();
     }
 }

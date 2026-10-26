@@ -38,14 +38,14 @@ public class AutorServiceImpl implements AutorService {
     @Override
     @Transactional
     public AutorResponseDTO criar(AutorRequestDTO dto) {
-        Autor autor = preencherDto(new Autor(), dto);
+        Autor autor = preencherDto(Autor.builder(), dto);
         return AutorResponseDTO.from(autorRepository.save(autor));
     }
 
     @Override
     @Transactional
     public AutorResponseDTO atualizar(Long id, AutorRequestDTO dto) {
-        Autor autor = preencherDto(buscarAutor(id), dto);
+        Autor autor = preencherDto(buscarAutor(id).toBuilder(), dto);
         return AutorResponseDTO.from(autorRepository.save(autor));
     }
 
@@ -66,11 +66,12 @@ public class AutorServiceImpl implements AutorService {
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Autor não encontrado com id " + id));
     }
 
-    private Autor preencherDto(Autor autor, AutorRequestDTO dto) {
-        autor.setNome(dto.nome());
-        autor.setNacionalidade(dto.nacionalidade());
-        autor.setDataNascimento(dto.dataNascimento());
-        autor.setBiografia(dto.biografia());
-        return autor;
+    private Autor preencherDto(Autor.AutorBuilder builder, AutorRequestDTO dto) {
+        return builder
+                .nome(dto.nome())
+                .nacionalidade(dto.nacionalidade())
+                .dataNascimento(dto.dataNascimento())
+                .biografia(dto.biografia())
+                .build();
     }
 }

@@ -1,7 +1,9 @@
 package br.com.bibliotecavirtual.api.dto.response;
 
 import br.com.bibliotecavirtual.model.entity.MaterialDigital;
+import lombok.Builder;
 
+@Builder
 public record MaterialDigitalResponseDTO(
         Long id,
         String titulo,
@@ -15,17 +17,23 @@ public record MaterialDigitalResponseDTO(
     public static MaterialDigitalResponseDTO from(MaterialDigital material) {
         ReferenciaResponseDTO livro = material.getLivro() == null
                 ? null
-                : new ReferenciaResponseDTO(material.getLivro().getId(), material.getLivro().getTitulo());
+                : ReferenciaResponseDTO.builder()
+                        .id(material.getLivro().getId())
+                        .nome(material.getLivro().getTitulo())
+                        .build();
 
-        return new MaterialDigitalResponseDTO(
-                material.getId(),
-                material.getTitulo(),
-                material.getTipo(),
-                material.getUrl(),
-                material.getDescricao(),
-                material.getSerie(),
-                new ReferenciaResponseDTO(material.getCategoria().getId(), material.getCategoria().getNome()),
-                livro
-        );
+        return MaterialDigitalResponseDTO.builder()
+                .id(material.getId())
+                .titulo(material.getTitulo())
+                .tipo(material.getTipo())
+                .url(material.getUrl())
+                .descricao(material.getDescricao())
+                .serie(material.getSerie())
+                .categoria(ReferenciaResponseDTO.builder()
+                        .id(material.getCategoria().getId())
+                        .nome(material.getCategoria().getNome())
+                        .build())
+                .livro(livro)
+                .build();
     }
 }

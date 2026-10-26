@@ -3,6 +3,7 @@ package br.com.bibliotecavirtual.model.service.impl;
 import br.com.bibliotecavirtual.api.dto.request.LivroRequestDTO;
 import br.com.bibliotecavirtual.api.dto.response.LivroResponseDTO;
 import br.com.bibliotecavirtual.client.QrCodeClient;
+import br.com.bibliotecavirtual.client.dto.QrCodeLivroDTO;
 import br.com.bibliotecavirtual.model.entity.Autor;
 import br.com.bibliotecavirtual.model.entity.Categoria;
 import br.com.bibliotecavirtual.model.entity.Editora;
@@ -56,7 +57,7 @@ public class LivroServiceImpl implements LivroService {
             throw new RegraNegocioException("Já existe um livro cadastrado com o ISBN " + dto.isbn());
         }
 
-        Livro livro = preencherDto(new Livro(), dto);
+        Livro livro = preencherDto(Livro.builder(), dto);
         gerarQrCode(livro);
         return LivroResponseDTO.from(livroRepository.save(livro));
     }
@@ -64,13 +65,13 @@ public class LivroServiceImpl implements LivroService {
     @Override
     @Transactional
     public LivroResponseDTO atualizar(Long id, LivroRequestDTO dto) {
-        Livro livro = buscarLivro(id);
+        Livro livroAtual = buscarLivro(id);
 
         if (livroRepository.existsByIsbnAndIdNot(dto.isbn(), id)) {
             throw new RegraNegocioException("Já existe outro livro cadastrado com o ISBN " + dto.isbn());
         }
 
-        preencherDto(livro, dto);
+        Livro livro = preencherDto(livroAtual.toBuilder(), dto);
         gerarQrCode(livro);
         return LivroResponseDTO.from(livroRepository.save(livro));
     }
@@ -104,26 +105,19 @@ public class LivroServiceImpl implements LivroService {
     }
 
     private void gerarQrCode(Livro livro) {
-        String conteudo = montarConteudoQrCode(livro);
-        String qrCode = qrCodeClient.gerar(conteudo)
+        QrCodeLivroDTO dadosQrCode = QrCodeLivroDTO.builder()
+                .titulo(livro.getTitulo())
+                .autor(livro.getAutor().getNome())
+                .editora(livro.getEditora().getNome())
+                .anoPublicacao(livro.getAnoPublicacao())
+                .isbn(livro.getIsbn())
+                .linkAcesso(livro.getLinkAcesso())
+                .build();
+
+        String qrCode = qrCodeClient.gerar(dadosQrCode)
                 .map(imagem -> Base64.getEncoder().encodeToString(imagem))
                 .orElse(null);
         livro.setQrCode(qrCode);
-    }
-
-    private String montarConteudoQrCode(Livro livro) {
-        StringBuilder conteudo = new StringBuilder()
-                .append("Título: ").append(livro.getTitulo()).append("\n")
-                .append("Autor: ").append(livro.getAutor().getNome()).append("\n")
-                .append("Editora: ").append(livro.getEditora().getNome()).append("\n")
-                .append("Ano: ").append(livro.getAnoPublicacao()).append("\n")
-                .append("ISBN: ").append(livro.getIsbn());
-
-        if (livro.getLinkAcesso() != null) {
-            conteudo.append("\n").append("Acesse: ").append(livro.getLinkAcesso());
-        }
-
-        return conteudo.toString();
     }
 
     private Livro buscarLivro(Long id) {
@@ -131,21 +125,22 @@ public class LivroServiceImpl implements LivroService {
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Livro não encontrado com id " + id));
     }
 
-    private Livro preencherDto(Livro livro, LivroRequestDTO dto) {
+    private Livro preencherDto(Livro.LivroBuilder builder, LivroRequestDTO dto) {
         if (dto.anoPublicacao() > Year.now().getValue()) {
             throw new RegraNegocioException("O ano de publicação não pode ser maior que o ano atual");
         }
 
-        livro.setTitulo(dto.titulo());
-        livro.setIsbn(dto.isbn());
-        livro.setAnoPublicacao(dto.anoPublicacao());
-        livro.setNumeroPaginas(dto.numeroPaginas());
-        livro.setSinopse(dto.sinopse());
-        livro.setLinkAcesso(dto.linkAcesso());
-        livro.setAutor(buscarAutor(dto.autorId()));
-        livro.setEditora(buscarEditora(dto.editoraId()));
-        livro.setCategoria(buscarCategoriaAtiva(dto.categoriaId()));
-        return livro;
+        return builder
+                .titulo(dto.titulo())
+                .isbn(dto.isbn())
+                .anoPublicacao(dto.anoPublicacao())
+                .numeroPaginas(dto.numeroPaginas())
+                .sinopse(dto.sinopse())
+                .linkAcesso(dto.linkAcesso())
+                .autor(buscarAutor(dto.autorId()))
+                .editora(buscarEditora(dto.editoraId()))
+                .categoria(buscarCategoriaAtiva(dto.categoriaId()))
+                .build();
     }
 
     private Autor buscarAutor(Long id) {

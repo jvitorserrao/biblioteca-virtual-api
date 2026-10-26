@@ -42,14 +42,14 @@ public class MaterialDigitalServiceImpl implements MaterialDigitalService {
     @Override
     @Transactional
     public MaterialDigitalResponseDTO criar(MaterialDigitalRequestDTO dto) {
-        MaterialDigital material = preencherDto(new MaterialDigital(), dto);
+        MaterialDigital material = preencherDto(MaterialDigital.builder(), dto);
         return MaterialDigitalResponseDTO.from(materialDigitalRepository.save(material));
     }
 
     @Override
     @Transactional
     public MaterialDigitalResponseDTO atualizar(Long id, MaterialDigitalRequestDTO dto) {
-        MaterialDigital material = preencherDto(buscarMaterial(id), dto);
+        MaterialDigital material = preencherDto(buscarMaterial(id).toBuilder(), dto);
         return MaterialDigitalResponseDTO.from(materialDigitalRepository.save(material));
     }
 
@@ -64,15 +64,16 @@ public class MaterialDigitalServiceImpl implements MaterialDigitalService {
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Material digital não encontrado com id " + id));
     }
 
-    private MaterialDigital preencherDto(MaterialDigital material, MaterialDigitalRequestDTO dto) {
-        material.setTitulo(dto.titulo());
-        material.setTipo(dto.tipo());
-        material.setUrl(dto.url());
-        material.setDescricao(dto.descricao());
-        material.setSerie(dto.serie());
-        material.setCategoria(buscarCategoriaAtiva(dto.categoriaId()));
-        material.setLivro(dto.livroId() == null ? null : buscarLivro(dto.livroId()));
-        return material;
+    private MaterialDigital preencherDto(MaterialDigital.MaterialDigitalBuilder builder, MaterialDigitalRequestDTO dto) {
+        return builder
+                .titulo(dto.titulo())
+                .tipo(dto.tipo())
+                .url(dto.url())
+                .descricao(dto.descricao())
+                .serie(dto.serie())
+                .categoria(buscarCategoriaAtiva(dto.categoriaId()))
+                .livro(dto.livroId() == null ? null : buscarLivro(dto.livroId()))
+                .build();
     }
 
     private Categoria buscarCategoriaAtiva(Long id) {
