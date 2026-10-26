@@ -7,6 +7,7 @@ import br.com.bibliotecavirtual.model.exception.RecursoNaoEncontradoException;
 import br.com.bibliotecavirtual.model.exception.RegraNegocioException;
 import br.com.bibliotecavirtual.model.repository.CategoriaRepository;
 import br.com.bibliotecavirtual.model.repository.LivroRepository;
+import br.com.bibliotecavirtual.model.repository.MaterialDigitalRepository;
 import br.com.bibliotecavirtual.model.service.CategoriaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,6 +21,7 @@ public class CategoriaServiceImpl implements CategoriaService {
 
     private final CategoriaRepository categoriaRepository;
     private final LivroRepository livroRepository;
+    private final MaterialDigitalRepository materialDigitalRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -65,6 +67,10 @@ public class CategoriaServiceImpl implements CategoriaService {
 
         if (livroRepository.existsByCategoriaId(id)) {
             throw new RegraNegocioException("Não é possível excluir a categoria " + categoria.getNome() + " pois ela possui livros cadastrados");
+        }
+
+        if (materialDigitalRepository.existsByCategoriaId(id)) {
+            throw new RegraNegocioException("Não é possível excluir a categoria " + categoria.getNome() + " pois ela possui materiais digitais cadastrados");
         }
 
         categoriaRepository.delete(categoria);

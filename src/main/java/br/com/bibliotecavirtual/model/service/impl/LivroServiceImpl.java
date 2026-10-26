@@ -14,6 +14,7 @@ import br.com.bibliotecavirtual.model.repository.AutorRepository;
 import br.com.bibliotecavirtual.model.repository.CategoriaRepository;
 import br.com.bibliotecavirtual.model.repository.EditoraRepository;
 import br.com.bibliotecavirtual.model.repository.LivroRepository;
+import br.com.bibliotecavirtual.model.repository.MaterialDigitalRepository;
 import br.com.bibliotecavirtual.model.service.LivroService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -31,6 +32,7 @@ public class LivroServiceImpl implements LivroService {
     private final AutorRepository autorRepository;
     private final EditoraRepository editoraRepository;
     private final CategoriaRepository categoriaRepository;
+    private final MaterialDigitalRepository materialDigitalRepository;
     private final QrCodeClient qrCodeClient;
 
     @Override
@@ -76,7 +78,13 @@ public class LivroServiceImpl implements LivroService {
     @Override
     @Transactional
     public void excluir(Long id) {
-        livroRepository.delete(buscarLivro(id));
+        Livro livro = buscarLivro(id);
+
+        if (materialDigitalRepository.existsByLivroId(id)) {
+            throw new RegraNegocioException("Não é possível excluir o livro " + livro.getTitulo() + " pois existem materiais digitais vinculados a ele");
+        }
+
+        livroRepository.delete(livro);
     }
 
     @Override
