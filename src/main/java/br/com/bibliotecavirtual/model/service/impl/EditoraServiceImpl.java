@@ -6,6 +6,7 @@ import br.com.bibliotecavirtual.model.entity.Editora;
 import br.com.bibliotecavirtual.model.exception.RecursoNaoEncontradoException;
 import br.com.bibliotecavirtual.model.exception.RegraNegocioException;
 import br.com.bibliotecavirtual.model.repository.EditoraRepository;
+import br.com.bibliotecavirtual.model.repository.LivroRepository;
 import br.com.bibliotecavirtual.model.service.EditoraService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,7 @@ import java.util.List;
 public class EditoraServiceImpl implements EditoraService {
 
     private final EditoraRepository editoraRepository;
+    private final LivroRepository livroRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -59,7 +61,13 @@ public class EditoraServiceImpl implements EditoraService {
     @Override
     @Transactional
     public void excluir(Long id) {
-        editoraRepository.delete(buscarEditora(id));
+        Editora editora = buscarEditora(id);
+
+        if (livroRepository.existsByEditoraId(id)) {
+            throw new RegraNegocioException("Não é possível excluir a editora " + editora.getNome() + " pois ela possui livros cadastrados");
+        }
+
+        editoraRepository.delete(editora);
     }
 
     private Editora buscarEditora(Long id) {

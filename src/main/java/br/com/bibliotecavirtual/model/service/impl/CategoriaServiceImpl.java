@@ -6,6 +6,7 @@ import br.com.bibliotecavirtual.model.entity.Categoria;
 import br.com.bibliotecavirtual.model.exception.RecursoNaoEncontradoException;
 import br.com.bibliotecavirtual.model.exception.RegraNegocioException;
 import br.com.bibliotecavirtual.model.repository.CategoriaRepository;
+import br.com.bibliotecavirtual.model.repository.LivroRepository;
 import br.com.bibliotecavirtual.model.service.CategoriaService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,6 +19,7 @@ import java.util.List;
 public class CategoriaServiceImpl implements CategoriaService {
 
     private final CategoriaRepository categoriaRepository;
+    private final LivroRepository livroRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -59,7 +61,13 @@ public class CategoriaServiceImpl implements CategoriaService {
     @Override
     @Transactional
     public void excluir(Long id) {
-        categoriaRepository.delete(buscarCategoria(id));
+        Categoria categoria = buscarCategoria(id);
+
+        if (livroRepository.existsByCategoriaId(id)) {
+            throw new RegraNegocioException("Não é possível excluir a categoria " + categoria.getNome() + " pois ela possui livros cadastrados");
+        }
+
+        categoriaRepository.delete(categoria);
     }
 
     private Categoria buscarCategoria(Long id) {

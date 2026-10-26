@@ -4,7 +4,9 @@ import br.com.bibliotecavirtual.api.dto.request.AutorRequestDTO;
 import br.com.bibliotecavirtual.api.dto.response.AutorResponseDTO;
 import br.com.bibliotecavirtual.model.entity.Autor;
 import br.com.bibliotecavirtual.model.exception.RecursoNaoEncontradoException;
+import br.com.bibliotecavirtual.model.exception.RegraNegocioException;
 import br.com.bibliotecavirtual.model.repository.AutorRepository;
+import br.com.bibliotecavirtual.model.repository.LivroRepository;
 import br.com.bibliotecavirtual.model.service.AutorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,6 +19,7 @@ import java.util.List;
 public class AutorServiceImpl implements AutorService {
 
     private final AutorRepository autorRepository;
+    private final LivroRepository livroRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -49,7 +52,13 @@ public class AutorServiceImpl implements AutorService {
     @Override
     @Transactional
     public void excluir(Long id) {
-        autorRepository.delete(buscarAutor(id));
+        Autor autor = buscarAutor(id);
+
+        if (livroRepository.existsByAutorId(id)) {
+            throw new RegraNegocioException("Não é possível excluir o autor " + autor.getNome() + " pois existem livros vinculados a ele");
+        }
+
+        autorRepository.delete(autor);
     }
 
     private Autor buscarAutor(Long id) {
