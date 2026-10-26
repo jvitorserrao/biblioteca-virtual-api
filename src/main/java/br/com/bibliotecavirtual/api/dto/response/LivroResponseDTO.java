@@ -12,9 +12,12 @@ public record LivroResponseDTO(
         String linkAcesso,
         ReferenciaResponseDTO autor,
         ReferenciaResponseDTO editora,
-        ReferenciaResponseDTO categoria
+        ReferenciaResponseDTO categoria,
+        String qrCode
 ) {
     public static LivroResponseDTO from(Livro livro) {
+        String qrCode = livro.getQrCode() == null ? null : "data:image/png;base64," + livro.getQrCode();
+
         return new LivroResponseDTO(
                 livro.getId(),
                 livro.getTitulo(),
@@ -25,7 +28,8 @@ public record LivroResponseDTO(
                 livro.getLinkAcesso(),
                 new ReferenciaResponseDTO(livro.getAutor().getId(), livro.getAutor().getNome()),
                 new ReferenciaResponseDTO(livro.getEditora().getId(), livro.getEditora().getNome()),
-                new ReferenciaResponseDTO(livro.getCategoria().getId(), livro.getCategoria().getNome())
+                new ReferenciaResponseDTO(livro.getCategoria().getId(), livro.getCategoria().getNome()),
+                qrCode
         );
     }
 }

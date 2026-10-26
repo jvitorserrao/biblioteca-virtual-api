@@ -2,10 +2,12 @@ package br.com.bibliotecavirtual.model.service.impl;
 
 import br.com.bibliotecavirtual.api.dto.request.LivroRequestDTO;
 import br.com.bibliotecavirtual.api.dto.response.LivroResponseDTO;
+import br.com.bibliotecavirtual.client.QrCodeClient;
 import br.com.bibliotecavirtual.model.entity.Autor;
 import br.com.bibliotecavirtual.model.entity.Categoria;
 import br.com.bibliotecavirtual.model.entity.Editora;
 import br.com.bibliotecavirtual.model.entity.Livro;
+import br.com.bibliotecavirtual.model.exception.IntegracaoException;
 import br.com.bibliotecavirtual.model.exception.RecursoNaoEncontradoException;
 import br.com.bibliotecavirtual.model.exception.RegraNegocioException;
 import br.com.bibliotecavirtual.model.repository.AutorRepository;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Year;
+import java.util.Base64;
 import java.util.List;
 
 @Service
@@ -28,6 +31,7 @@ public class LivroServiceImpl implements LivroService {
     private final AutorRepository autorRepository;
     private final EditoraRepository editoraRepository;
     private final CategoriaRepository categoriaRepository;
+    private final QrCodeClient qrCodeClient;
 
     @Override
     @Transactional(readOnly = true)
@@ -51,6 +55,7 @@ public class LivroServiceImpl implements LivroService {
         }
 
         Livro livro = preencherDto(new Livro(), dto);
+        gerarQrCode(livro);
         return LivroResponseDTO.from(livroRepository.save(livro));
     }
 
@@ -63,13 +68,54 @@ public class LivroServiceImpl implements LivroService {
             throw new RegraNegocioException("Já existe outro livro cadastrado com o ISBN " + dto.isbn());
         }
 
-        return LivroResponseDTO.from(livroRepository.save(preencherDto(livro, dto)));
+        preencherDto(livro, dto);
+        gerarQrCode(livro);
+        return LivroResponseDTO.from(livroRepository.save(livro));
     }
 
     @Override
     @Transactional
     public void excluir(Long id) {
         livroRepository.delete(buscarLivro(id));
+    }
+
+    @Override
+    @Transactional
+    public byte[] buscarQrCode(Long id) {
+        Livro livro = buscarLivro(id);
+
+        if (livro.getQrCode() == null) {
+            gerarQrCode(livro);
+        }
+
+        if (livro.getQrCode() == null) {
+            throw new IntegracaoException("Não foi possível gerar o QR Code do livro. Tente novamente mais tarde.");
+        }
+
+        return Base64.getDecoder().decode(livro.getQrCode());
+    }
+
+    private void gerarQrCode(Livro livro) {
+        String conteudo = montarConteudoQrCode(livro);
+        String qrCode = qrCodeClient.gerar(conteudo)
+                .map(imagem -> Base64.getEncoder().encodeToString(imagem))
+                .orElse(null);
+        livro.setQrCode(qrCode);
+    }
+
+    private String montarConteudoQrCode(Livro livro) {
+        StringBuilder conteudo = new StringBuilder()
+                .append("Título: ").append(livro.getTitulo()).append("\n")
+                .append("Autor: ").append(livro.getAutor().getNome()).append("\n")
+                .append("Editora: ").append(livro.getEditora().getNome()).append("\n")
+                .append("Ano: ").append(livro.getAnoPublicacao()).append("\n")
+                .append("ISBN: ").append(livro.getIsbn());
+
+        if (livro.getLinkAcesso() != null) {
+            conteudo.append("\n").append("Acesse: ").append(livro.getLinkAcesso());
+        }
+
+        return conteudo.toString();
     }
 
     private Livro buscarLivro(Long id) {

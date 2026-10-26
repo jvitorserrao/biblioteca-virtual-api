@@ -1,5 +1,6 @@
 package br.com.bibliotecavirtual.api.exception;
 
+import br.com.bibliotecavirtual.model.exception.IntegracaoException;
 import br.com.bibliotecavirtual.model.exception.RecursoNaoEncontradoException;
 import br.com.bibliotecavirtual.model.exception.RegraNegocioException;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +33,12 @@ public class GlobalExceptionHandler {
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErroResponse tratarRegraNegocio(RegraNegocioException ex) {
         return montarErro(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(IntegracaoException.class)
+    @ResponseStatus(HttpStatus.SERVICE_UNAVAILABLE)
+    public ErroResponse tratarIntegracao(IntegracaoException ex) {
+        return montarErro(HttpStatus.SERVICE_UNAVAILABLE, ex.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

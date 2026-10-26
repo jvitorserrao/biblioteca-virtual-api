@@ -4,10 +4,14 @@ import br.com.bibliotecavirtual.api.dto.request.LivroRequestDTO;
 import br.com.bibliotecavirtual.api.dto.response.LivroResponseDTO;
 import br.com.bibliotecavirtual.model.service.LivroService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -50,5 +54,15 @@ public class LivroController {
     @Operation(summary = "Exclui um livro")
     public void excluir(@PathVariable Long id) {
         livroService.excluir(id);
+    }
+
+    @GetMapping("/{id}/qrcode")
+    @Operation(summary = "Retorna a imagem PNG do QR Code com as informações do livro")
+    @ApiResponse(responseCode = "200", description = "Imagem do QR Code",
+            content = @Content(mediaType = MediaType.IMAGE_PNG_VALUE))
+    public ResponseEntity<byte[]> buscarQrCode(@PathVariable Long id) {
+        return ResponseEntity.ok()
+                .contentType(MediaType.IMAGE_PNG)
+                .body(livroService.buscarQrCode(id));
     }
 }

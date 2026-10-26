@@ -16,4 +16,6 @@ public interface LivroService {
     LivroResponseDTO atualizar(Long id, LivroRequestDTO dto);
 
     void excluir(Long id);
+
+    byte[] buscarQrCode(Long id);
 }

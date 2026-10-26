@@ -34,6 +34,9 @@ public class Livro {
     @Column(name = "link_acesso", length = 500)
     private String linkAcesso;
 
+    @Column(name = "qr_code", columnDefinition = "TEXT")
+    private String qrCode;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "autor_id", nullable = false)
     private Autor autor;
