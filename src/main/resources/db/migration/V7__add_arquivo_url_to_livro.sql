@@ -1,0 +1,1 @@
+ALTER TABLE livro ADD COLUMN arquivo_url VARCHAR(500);

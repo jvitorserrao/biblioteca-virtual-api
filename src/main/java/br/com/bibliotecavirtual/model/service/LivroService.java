@@ -2,6 +2,7 @@ package br.com.bibliotecavirtual.model.service;
 
 import br.com.bibliotecavirtual.api.dto.request.LivroRequestDTO;
 import br.com.bibliotecavirtual.api.dto.response.LivroResponseDTO;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -18,4 +19,8 @@ public interface LivroService {
     void excluir(Long id);
 
     byte[] buscarQrCode(Long id);
+
+    LivroResponseDTO enviarArquivo(Long id, MultipartFile arquivo);
+
+    void removerArquivo(Long id);
 }

@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.MultipartException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.time.LocalDateTime;
@@ -80,7 +83,26 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
     @ResponseStatus(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
     public ErroResponse tratarTipoConteudoInvalido(HttpMediaTypeNotSupportedException ex) {
-        return montarErro(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "Tipo de conteúdo não suportado. Use application/json");
+        return montarErro(HttpStatus.UNSUPPORTED_MEDIA_TYPE,
+                "Tipo de conteúdo não suportado: " + ex.getContentType() + ". Aceitos: " + ex.getSupportedMediaTypes());
+    }
+
+    @ExceptionHandler(MissingServletRequestPartException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErroResponse tratarArquivoAusente(MissingServletRequestPartException ex) {
+        return montarErro(HttpStatus.BAD_REQUEST, "Envie o arquivo no campo '" + ex.getRequestPartName() + "'");
+    }
+
+    @ExceptionHandler(MultipartException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ErroResponse tratarEnvioArquivo(MultipartException ex) {
+        return montarErro(HttpStatus.BAD_REQUEST, "Requisição de envio de arquivo inválida");
+    }
+
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    @ResponseStatus(HttpStatus.CONTENT_TOO_LARGE)
+    public ErroResponse tratarArquivoGrande(MaxUploadSizeExceededException ex) {
+        return montarErro(HttpStatus.CONTENT_TOO_LARGE, "O arquivo deve ter no máximo 20 MB");
     }
 
     @ExceptionHandler(DataIntegrityViolationException.class)

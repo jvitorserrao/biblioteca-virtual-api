@@ -2,8 +2,8 @@ package br.com.bibliotecavirtual.model.service.impl;
 
 import br.com.bibliotecavirtual.api.dto.request.LivroRequestDTO;
 import br.com.bibliotecavirtual.api.dto.response.LivroResponseDTO;
+import br.com.bibliotecavirtual.client.ArmazenamentoClient;
 import br.com.bibliotecavirtual.client.QrCodeClient;
-import br.com.bibliotecavirtual.client.dto.QrCodeLivroDTO;
 import br.com.bibliotecavirtual.model.entity.Autor;
 import br.com.bibliotecavirtual.model.entity.Categoria;
 import br.com.bibliotecavirtual.model.entity.Editora;
@@ -18,9 +18,13 @@ import br.com.bibliotecavirtual.model.repository.LivroRepository;
 import br.com.bibliotecavirtual.model.repository.MaterialDigitalRepository;
 import br.com.bibliotecavirtual.model.service.LivroService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.time.Year;
 import java.util.Base64;
 import java.util.List;
@@ -35,6 +39,7 @@ public class LivroServiceImpl implements LivroService {
     private final CategoriaRepository categoriaRepository;
     private final MaterialDigitalRepository materialDigitalRepository;
     private final QrCodeClient qrCodeClient;
+    private final ArmazenamentoClient armazenamentoClient;
 
     @Override
     @Transactional(readOnly = true)
@@ -58,7 +63,6 @@ public class LivroServiceImpl implements LivroService {
         }
 
         Livro livro = preencherDto(Livro.builder(), dto);
-        gerarQrCode(livro);
         return LivroResponseDTO.from(livroRepository.save(livro));
     }
 
@@ -72,7 +76,6 @@ public class LivroServiceImpl implements LivroService {
         }
 
         Livro livro = preencherDto(livroAtual.toBuilder(), dto);
-        gerarQrCode(livro);
         return LivroResponseDTO.from(livroRepository.save(livro));
     }
 
@@ -86,12 +89,20 @@ public class LivroServiceImpl implements LivroService {
         }
 
         livroRepository.delete(livro);
+
+        if (livro.getArquivoUrl() != null) {
+            armazenamentoClient.remover(livro.getArquivoUrl());
+        }
     }
 
     @Override
     @Transactional
     public byte[] buscarQrCode(Long id) {
         Livro livro = buscarLivro(id);
+
+        if (livro.getArquivoUrl() == null) {
+            throw new RecursoNaoEncontradoException("O livro " + livro.getTitulo() + " ainda não possui PDF. Envie o arquivo para gerar o QR Code");
+        }
 
         if (livro.getQrCode() == null) {
             gerarQrCode(livro);
@@ -104,17 +115,59 @@ public class LivroServiceImpl implements LivroService {
         return Base64.getDecoder().decode(livro.getQrCode());
     }
 
-    private void gerarQrCode(Livro livro) {
-        QrCodeLivroDTO dadosQrCode = QrCodeLivroDTO.builder()
-                .titulo(livro.getTitulo())
-                .autor(livro.getAutor().getNome())
-                .editora(livro.getEditora().getNome())
-                .anoPublicacao(livro.getAnoPublicacao())
-                .isbn(livro.getIsbn())
-                .linkAcesso(livro.getLinkAcesso())
-                .build();
+    @Override
+    @Transactional
+    public LivroResponseDTO enviarArquivo(Long id, MultipartFile arquivo) {
+        Livro livro = buscarLivro(id);
+        byte[] conteudo = lerPdf(arquivo);
 
-        String qrCode = qrCodeClient.gerar(dadosQrCode)
+        String url = armazenamentoClient.enviar("livro-" + id + ".pdf", conteudo, MediaType.APPLICATION_PDF);
+
+        if (!url.equals(livro.getArquivoUrl()) || livro.getQrCode() == null) {
+            livro.setArquivoUrl(url);
+            gerarQrCode(livro);
+        }
+
+        return LivroResponseDTO.from(livroRepository.save(livro));
+    }
+
+    @Override
+    @Transactional
+    public void removerArquivo(Long id) {
+        Livro livro = buscarLivro(id);
+
+        if (livro.getArquivoUrl() == null) {
+            throw new RecursoNaoEncontradoException("O livro " + livro.getTitulo() + " não possui arquivo enviado");
+        }
+
+        armazenamentoClient.remover(livro.getArquivoUrl());
+        livro.setArquivoUrl(null);
+        livro.setQrCode(null);
+        livroRepository.save(livro);
+    }
+
+    private byte[] lerPdf(MultipartFile arquivo) {
+        if (arquivo == null || arquivo.isEmpty()) {
+            throw new RegraNegocioException("Envie um arquivo PDF");
+        }
+
+        byte[] conteudo;
+        try {
+            conteudo = arquivo.getBytes();
+        } catch (IOException ex) {
+            throw new RegraNegocioException("Não foi possível ler o arquivo enviado");
+        }
+
+        String assinatura = new String(conteudo, 0, Math.min(4, conteudo.length), StandardCharsets.US_ASCII);
+        if (!assinatura.equals("%PDF")) {
+            throw new RegraNegocioException("Apenas arquivos PDF são aceitos");
+        }
+
+        return conteudo;
+    }
+
+    private void gerarQrCode(Livro livro) {
+        String qrCode = qrCodeClient.gerar(livro.getArquivoUrl())
                 .map(imagem -> Base64.getEncoder().encodeToString(imagem))
                 .orElse(null);
         livro.setQrCode(qrCode);

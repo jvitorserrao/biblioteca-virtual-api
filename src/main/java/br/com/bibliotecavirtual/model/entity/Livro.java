@@ -38,6 +38,9 @@ public class Livro {
     @Column(name = "link_acesso", length = 500)
     private String linkAcesso;
 
+    @Column(name = "arquivo_url", length = 500)
+    private String arquivoUrl;
+
     @Column(name = "qr_code", columnDefinition = "TEXT")
     private String qrCode;
 

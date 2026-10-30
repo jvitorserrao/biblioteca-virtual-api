@@ -13,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -57,12 +58,25 @@ public class LivroController {
     }
 
     @GetMapping("/{id}/qrcode")
-    @Operation(summary = "Retorna a imagem PNG do QR Code com as informações do livro")
+    @Operation(summary = "Retorna a imagem PNG do QR Code que abre o PDF do livro")
     @ApiResponse(responseCode = "200", description = "Imagem do QR Code",
             content = @Content(mediaType = MediaType.IMAGE_PNG_VALUE))
     public ResponseEntity<byte[]> buscarQrCode(@PathVariable Long id) {
         return ResponseEntity.ok()
                 .contentType(MediaType.IMAGE_PNG)
                 .body(livroService.buscarQrCode(id));
+    }
+
+    @PostMapping(value = "/{id}/arquivo", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Envia o PDF do livro e gera um novo QR Code apontando para o arquivo")
+    public LivroResponseDTO enviarArquivo(@PathVariable Long id, @RequestParam("arquivo") MultipartFile arquivo) {
+        return livroService.enviarArquivo(id, arquivo);
+    }
+
+    @DeleteMapping("/{id}/arquivo")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @Operation(summary = "Remove o PDF do livro")
+    public void removerArquivo(@PathVariable Long id) {
+        livroService.removerArquivo(id);
     }
 }

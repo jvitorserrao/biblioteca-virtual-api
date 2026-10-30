@@ -12,6 +12,7 @@ public record LivroResponseDTO(
         Integer numeroPaginas,
         String sinopse,
         String linkAcesso,
+        String arquivoUrl,
         ReferenciaResponseDTO autor,
         ReferenciaResponseDTO editora,
         ReferenciaResponseDTO categoria,
@@ -26,6 +27,7 @@ public record LivroResponseDTO(
                 .numeroPaginas(livro.getNumeroPaginas())
                 .sinopse(livro.getSinopse())
                 .linkAcesso(livro.getLinkAcesso())
+                .arquivoUrl(livro.getArquivoUrl())
                 .autor(ReferenciaResponseDTO.builder()
                         .id(livro.getAutor().getId())
                         .nome(livro.getAutor().getNome())
