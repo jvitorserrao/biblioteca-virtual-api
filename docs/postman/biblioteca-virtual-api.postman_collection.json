@@ -1,0 +1,442 @@
+{
+  "info": {
+    "name": "Biblioteca Virtual API",
+    "description": "Endpoints da API REST da biblioteca virtual. Execute as pastas na ordem: os cadastros salvam os IDs criados nas variáveis da coleção (autorId, editoraId, categoriaId, livroId, materialId), usados nas requisições seguintes.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "autorId", "value": "1" },
+    { "key": "editoraId", "value": "1" },
+    { "key": "categoriaId", "value": "1" },
+    { "key": "livroId", "value": "1" },
+    { "key": "materialId", "value": "1" }
+  ],
+  "item": [
+    {
+      "name": "1. Autores",
+      "item": [
+        {
+          "name": "Cadastrar autor",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "if (pm.response.code === 201) pm.collectionVariables.set('autorId', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Machado de Assis\",\n  \"nacionalidade\": \"Brasileira\",\n  \"dataNascimento\": \"1839-06-21\",\n  \"biografia\": \"Escritor brasileiro, fundador da Academia Brasileira de Letras.\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/autores"
+          }
+        },
+        {
+          "name": "Listar autores",
+          "request": { "method": "GET", "url": "{{baseUrl}}/autores" }
+        },
+        {
+          "name": "Buscar autor por ID",
+          "request": { "method": "GET", "url": "{{baseUrl}}/autores/{{autorId}}" }
+        },
+        {
+          "name": "Atualizar autor",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Joaquim Maria Machado de Assis\",\n  \"nacionalidade\": \"Brasileira\",\n  \"dataNascimento\": \"1839-06-21\",\n  \"biografia\": \"Autor de Dom Casmurro e Memórias Póstumas de Brás Cubas.\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/autores/{{autorId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Editoras",
+      "item": [
+        {
+          "name": "Cadastrar editora",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "if (pm.response.code === 201) pm.collectionVariables.set('editoraId', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Editora Ática\",\n  \"cnpj\": \"11444777000161\",\n  \"cidade\": \"São Paulo\",\n  \"site\": \"https://www.atica.com.br\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/editoras"
+          }
+        },
+        {
+          "name": "Listar editoras",
+          "request": { "method": "GET", "url": "{{baseUrl}}/editoras" }
+        },
+        {
+          "name": "Buscar editora por ID",
+          "request": { "method": "GET", "url": "{{baseUrl}}/editoras/{{editoraId}}" }
+        },
+        {
+          "name": "Atualizar editora",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Editora Ática S.A.\",\n  \"cnpj\": \"11444777000161\",\n  \"cidade\": \"São Paulo\",\n  \"site\": \"https://www.atica.com.br\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/editoras/{{editoraId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Categorias",
+      "item": [
+        {
+          "name": "Cadastrar categoria",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "if (pm.response.code === 201) pm.collectionVariables.set('categoriaId', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Literatura Brasileira\",\n  \"descricao\": \"Clássicos e obras contemporâneas da literatura nacional\",\n  \"areaConhecimento\": \"Linguagens\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/categorias"
+          }
+        },
+        {
+          "name": "Listar categorias",
+          "request": { "method": "GET", "url": "{{baseUrl}}/categorias" }
+        },
+        {
+          "name": "Buscar categoria por ID",
+          "request": { "method": "GET", "url": "{{baseUrl}}/categorias/{{categoriaId}}" }
+        },
+        {
+          "name": "Atualizar categoria",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Literatura Brasileira\",\n  \"descricao\": \"Obras exigidas nos vestibulares e no ENEM\",\n  \"areaConhecimento\": \"Linguagens\",\n  \"ativa\": true\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/categorias/{{categoriaId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Livros",
+      "item": [
+        {
+          "name": "Cadastrar livro",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "if (pm.response.code === 201) pm.collectionVariables.set('livroId', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Dom Casmurro\",\n  \"isbn\": \"9788508012343\",\n  \"anoPublicacao\": 1899,\n  \"numeroPaginas\": 256,\n  \"sinopse\": \"Bentinho narra sua história com Capitu e a dúvida sobre a traição.\",\n  \"linkAcesso\": \"https://www.gutenberg.org/ebooks/55752\",\n  \"autorId\": {{autorId}},\n  \"editoraId\": {{editoraId}},\n  \"categoriaId\": {{categoriaId}}\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/livros"
+          }
+        },
+        {
+          "name": "Listar livros",
+          "request": { "method": "GET", "url": "{{baseUrl}}/livros" }
+        },
+        {
+          "name": "Buscar livro por ID",
+          "request": { "method": "GET", "url": "{{baseUrl}}/livros/{{livroId}}" }
+        },
+        {
+          "name": "Atualizar livro",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Dom Casmurro - Edição Comentada\",\n  \"isbn\": \"9788508012343\",\n  \"anoPublicacao\": 1899,\n  \"numeroPaginas\": 288,\n  \"sinopse\": \"Edição com notas para estudantes do ensino médio.\",\n  \"linkAcesso\": \"https://www.gutenberg.org/ebooks/55752\",\n  \"autorId\": {{autorId}},\n  \"editoraId\": {{editoraId}},\n  \"categoriaId\": {{categoriaId}}\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/livros/{{livroId}}"
+          }
+        },
+        {
+          "name": "Imagem do QR Code do livro (depois do PDF)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "pm.test('Retorna PNG', () => pm.response.to.have.header('Content-Type', 'image/png'));"
+                ]
+              }
+            }
+          ],
+          "request": { "method": "GET", "url": "{{baseUrl}}/livros/{{livroId}}/qrcode" }
+        },
+        {
+          "name": "Enviar PDF do livro (gera o QR Code)",
+          "request": {
+            "method": "POST",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "arquivo", "type": "file", "src": [], "description": "Selecione um arquivo PDF de até 20 MB" }
+              ]
+            },
+            "url": "{{baseUrl}}/livros/{{livroId}}/arquivo"
+          }
+        },
+        {
+          "name": "Remover PDF do livro",
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/livros/{{livroId}}/arquivo" }
+        }
+      ]
+    },
+    {
+      "name": "5. Materiais digitais",
+      "item": [
+        {
+          "name": "Cadastrar material digital",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Status 201', () => pm.response.to.have.status(201));",
+                  "if (pm.response.code === 201) pm.collectionVariables.set('materialId', pm.response.json().id);"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Videoaula: análise de Dom Casmurro\",\n  \"tipo\": \"VIDEO\",\n  \"url\": \"https://www.youtube.com/watch?v=exemplo\",\n  \"descricao\": \"Narrador não confiável e contexto do Realismo.\",\n  \"serie\": 3,\n  \"categoriaId\": {{categoriaId}},\n  \"livroId\": {{livroId}}\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/materiais"
+          }
+        },
+        {
+          "name": "Listar materiais digitais",
+          "request": { "method": "GET", "url": "{{baseUrl}}/materiais" }
+        },
+        {
+          "name": "Buscar material digital por ID",
+          "request": { "method": "GET", "url": "{{baseUrl}}/materiais/{{materialId}}" }
+        },
+        {
+          "name": "Atualizar material digital",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Apostila: Realismo no Brasil\",\n  \"tipo\": \"APOSTILA\",\n  \"url\": \"https://exemplo.com/apostila-realismo.pdf\",\n  \"descricao\": \"Material de apoio sobre Machado de Assis e o Realismo.\",\n  \"serie\": 2,\n  \"categoriaId\": {{categoriaId}},\n  \"livroId\": {{livroId}}\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/materiais/{{materialId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Cenários de erro",
+      "item": [
+        {
+          "name": "Autor com dados inválidos (400)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"\",\n  \"nacionalidade\": \"\",\n  \"dataNascimento\": \"2999-01-01\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/autores"
+          }
+        },
+        {
+          "name": "Autor inexistente (404)",
+          "request": { "method": "GET", "url": "{{baseUrl}}/autores/999999" }
+        },
+        {
+          "name": "Editora com CNPJ inválido (400)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Editora Teste\",\n  \"cnpj\": \"12345678000100\",\n  \"cidade\": \"Recife\",\n  \"site\": \"www.sem-protocolo.com.br\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/editoras"
+          }
+        },
+        {
+          "name": "Editora com CNPJ já cadastrado (400)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Outra Editora\",\n  \"cnpj\": \"11444777000161\",\n  \"cidade\": \"Rio de Janeiro\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/editoras"
+          }
+        },
+        {
+          "name": "Livro com ISBN já cadastrado (400)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Livro duplicado\",\n  \"isbn\": \"9788508012343\",\n  \"anoPublicacao\": 2000,\n  \"autorId\": {{autorId}},\n  \"editoraId\": {{editoraId}},\n  \"categoriaId\": {{categoriaId}}\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/livros"
+          }
+        },
+        {
+          "name": "Livro com ano no futuro (400)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Livro do futuro\",\n  \"isbn\": \"9788572326971\",\n  \"anoPublicacao\": 2999,\n  \"autorId\": {{autorId}},\n  \"editoraId\": {{editoraId}},\n  \"categoriaId\": {{categoriaId}}\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/livros"
+          }
+        },
+        {
+          "name": "Livro com autor inexistente (404)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Livro sem autor\",\n  \"isbn\": \"9788572326971\",\n  \"anoPublicacao\": 2000,\n  \"autorId\": 999999,\n  \"editoraId\": {{editoraId}},\n  \"categoriaId\": {{categoriaId}}\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/livros"
+          }
+        },
+        {
+          "name": "Material com tipo e série inválidos (400)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"Podcast\",\n  \"tipo\": \"PODCAST\",\n  \"url\": \"https://exemplo.com/podcast\",\n  \"serie\": 4,\n  \"categoriaId\": {{categoriaId}}\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/materiais"
+          }
+        },
+        {
+          "name": "Excluir autor com livros vinculados (400)",
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/autores/{{autorId}}" }
+        },
+        {
+          "name": "Excluir livro com materiais vinculados (400)",
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/livros/{{livroId}}" }
+        },
+        {
+          "name": "Rota inexistente (404)",
+          "request": { "method": "GET", "url": "{{baseUrl}}/rota-que-nao-existe" }
+        }
+      ]
+    },
+    {
+      "name": "7. Exclusões (ordem das dependências)",
+      "item": [
+        {
+          "name": "Excluir material digital",
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/materiais/{{materialId}}" }
+        },
+        {
+          "name": "Excluir livro",
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/livros/{{livroId}}" }
+        },
+        {
+          "name": "Excluir categoria",
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/categorias/{{categoriaId}}" }
+        },
+        {
+          "name": "Excluir editora",
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/editoras/{{editoraId}}" }
+        },
+        {
+          "name": "Excluir autor",
+          "request": { "method": "DELETE", "url": "{{baseUrl}}/autores/{{autorId}}" }
+        }
+      ]
+    }
+  ]
+}
